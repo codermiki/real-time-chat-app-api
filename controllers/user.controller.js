@@ -1,12 +1,12 @@
 import bcrypt from "bcryptjs";
 import User from "../models/user.model.js";
 import { generateToken } from "../utils/generateToken.js";
+import cloudinary from "../utils/cloudinary.js";
 
 // Controller to signup a new user
 export const signup = async (req, res) => {
-   const { fullName, email, password, bio } = req.body;
-
    try {
+      const { fullName, email, password, bio } = req.body;
       // check all details are filled
       if (!fullName || !email || !password || !bio) {
          return res.json({
@@ -52,9 +52,8 @@ export const signup = async (req, res) => {
 
 // Controller to signin a user
 export const signin = async (req, res) => {
-   const { email, password } = req.body;
-
    try {
+      const { email, password } = req.body;
       // check if the email exists
       const user = await User.findOne({ email });
       if (!user) {
@@ -80,6 +79,51 @@ export const signin = async (req, res) => {
          message: "Signed in successfully",
          data: user,
          token,
+      });
+   } catch (error) {
+      console.log(error.message);
+      res.json({
+         success: false,
+         message: error.message,
+      });
+   }
+};
+
+// Controller to check if user is authenticated
+export const isAuthenticated = async (req, res) => {
+   res.json({
+      success: true,
+      data: req.user,
+   });
+};
+
+// Controller to update user profile details
+export const updateProfile = async (req, res) => {
+   try {
+      const { profilePic, bio, fullName } = req.body;
+      const userId = req.user._id;
+      let updatedUser;
+
+      if (!profilePic) {
+         updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { bio, fullName },
+            { new: true }
+         );
+      } else {
+         const upload = await cloudinary.uploader.upload(profilePic);
+
+         updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { bio, fullName, profilePic: upload.secure_url },
+            { new: true }
+         );
+      }
+
+      res.json({
+         success: true,
+         message: "Update profile successfully",
+         data: updatedUser,
       });
    } catch (error) {
       console.log(error.message);
