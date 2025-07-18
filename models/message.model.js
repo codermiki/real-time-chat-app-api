@@ -21,6 +21,6 @@ const messageSchema = new mongoose.Schema(
 );
 
 // Create Message Modal
-const Message = mongoose.model("User", messageSchema);
+const Message = mongoose.model("Message", messageSchema);
 
 export default Message;

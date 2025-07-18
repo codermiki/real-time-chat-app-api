@@ -43,9 +43,9 @@ app.use(express.json({ limit: "4mb" }));
 app.use(cors());
 
 // Route setup
-app.use("/api/v1/status", (req, res) => res.send("Server is live!"));
-app.use("/api/v1/auth", userRoutes);
-app.use("/api/v1/messages", messageRoutes);
+app.use("/v1/status", (req, res) => res.send("Server is live!"));
+app.use("/v1/auth", userRoutes);
+app.use("/v1/messages", messageRoutes);
 
 // connect to mongodb
 await connectDB();

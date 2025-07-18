@@ -5,7 +5,7 @@ import {
    getMessages,
    markMessageSeen,
    sendMessage,
-} from "../controllers/message.controller";
+} from "../controllers/message.controller.js";
 
 const messageRouter = Router();
 
