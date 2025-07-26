@@ -6,7 +6,12 @@ import cloudinary from "../utils/cloudinary.js";
 // Controller to signup a new user
 export const signup = async (req, res) => {
    try {
-      const { fullName, email, password, bio } = req.body;
+      const {
+         fullName,
+         email,
+         password,
+         bio = "I am using SoftChat",
+      } = req.body;
       // check all details are filled
       if (!fullName || !email || !password || !bio) {
          return res.json({
@@ -24,7 +29,7 @@ export const signup = async (req, res) => {
       }
       // Encrypt the user password
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = bcrypt.hash(password, salt);
+      const hashedPassword = await bcrypt.hash(password, salt);
       // Create new user
       const newUser = await User.create({
          fullName,
