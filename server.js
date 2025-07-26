@@ -16,7 +16,9 @@ const server = http.createServer(app);
 
 // Initialize socket.io
 export const io = new Server(server, {
-   cors: { origin: "*" },
+   cors: {
+      origin: "http://localhost:5173", // Vite's dev server
+   },
 });
 
 // Store online users
@@ -24,15 +26,14 @@ export const userSocketMap = {}; //{ userId: socketId }
 // Socket.io connection handler
 io.on("connection", (socket) => {
    const userId = socket.handshake.query.userId;
-   console.log("a user connected", userId);
+   console.log("Socket connected:", socket.id, "from user:", userId);
+
    if (userId) userSocketMap[userId] = socket.id;
 
-   // emit online user to all connected clients
    io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-   // Handle user disconnection
    socket.on("disconnect", () => {
-      console.log("user disconnected", userId);
+      console.log("Socket disconnected:", socket.id, "user:", userId);
       delete userSocketMap[userId];
       io.emit("getOnlineUsers", Object.keys(userSocketMap));
    });

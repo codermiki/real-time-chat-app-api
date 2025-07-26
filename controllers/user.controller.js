@@ -60,7 +60,7 @@ export const signin = async (req, res) => {
    try {
       const { email, password } = req.body;
       // check if the email exists
-      const user = await User.findOne({ email });
+      let user = await User.findOne({ email });
       if (!user) {
          return res.json({
             success: false,
@@ -76,6 +76,9 @@ export const signin = async (req, res) => {
             message: "Invalid email or password",
          });
       }
+      // remove password from the user object to send the user info except password
+      user = user.toObject();
+      delete user["password"];
 
       // generate token
       const token = generateToken(user._id);
