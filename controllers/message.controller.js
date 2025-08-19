@@ -1,29 +1,32 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import { io, userSocketMap } from "../server.js";
+import cloudinary from "../utils/cloudinary.js";
 
 // Controller to get all users except logged user
 export const getAllUsers = async (req, res) => {
    try {
       const userId = req.user._id;
+
+      // Get all users except the logged-in one
       const users = await User.find({ _id: { $ne: userId } }).select(
          "-password"
       );
 
-      // count the number of the unread message
+      // Attach unseen message counts
       const promises = users.map(async (user) => {
-         const messages = await Message.find({
+         const unseenCount = await Message.countDocuments({
             senderId: user._id,
             receiverId: userId,
             seen: false,
          });
-         if (messages.length > 0) {
-            return {
-               ...user,
-               unseenMessages: messages.length,
-            };
-         }
+
+         return {
+            ...user.toObject(), // convert Mongoose doc to plain object
+            unseenMessages: unseenCount, // always included (0 if none)
+         };
       });
+
       const mappedUsers = await Promise.all(promises);
 
       res.json({
@@ -32,7 +35,7 @@ export const getAllUsers = async (req, res) => {
          data: mappedUsers,
       });
    } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       res.json({
          success: false,
          message: error.message,
